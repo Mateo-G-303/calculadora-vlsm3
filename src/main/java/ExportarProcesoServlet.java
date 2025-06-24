@@ -53,22 +53,32 @@ public class ExportarProcesoServlet extends HttpServlet {
         response.setHeader("Content-Disposition", "attachment; filename=proceso_vlsm.pdf");
 
         Document document = new Document();
+        OutputStream out = null;
+
         try {
-            PdfWriter.getInstance(document, response.getOutputStream());
+            out = response.getOutputStream();
+            PdfWriter.getInstance(document, out);
             document.open();
 
             Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16);
             Font font = FontFactory.getFont(FontFactory.COURIER, 12);
 
-            document.add(new Paragraph("Proceso jerárquico VLSM (bit a bit)", titleFont));
+            document.add(new Paragraph("Proceso VLSM con Método de bit a bit", titleFont));
             document.add(new Paragraph("IP base: " + ipBase + "/" + prefijoBase + "\n", font));
-
+            document.add(new Paragraph("Hosts: " + necesidades.toString(), font));
             int[] contadorSubred = {1};
+            
             IPUtils.dividirYMostrar(ipBase, prefijoBase, 0, necesidades, document, font, contadorSubred);
 
-            document.close();
         } catch (DocumentException e) {
             throw new IOException("Error al generar PDF: " + e.getMessage());
+        } finally {
+            if (document.isOpen()) {
+                document.close();
+            }
+            if (out != null) {
+                out.close();
+            }
         }
     }
 
